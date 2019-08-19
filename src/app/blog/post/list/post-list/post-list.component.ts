@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { PostService } from '../../services/post.service';
+
+import { Observable } from 'rxjs';
+import { PostListItem } from 'src/app/blog/post/services/dataModel/postListItem';
+import { PostService } from 'src/app/blog/post/services/post.service';
+
 
 @Component({
   selector: 'app-post-list',
@@ -8,8 +12,8 @@ import { PostService } from '../../services/post.service';
 })
 export class PostListComponent implements OnInit {
 
-  public postList;
-
+  public postList: Observable<PostListItem[]>;
+  public displayedColumns: string[] = ['id', 'title', 'subTitle', 'imageUrl'];
 
   constructor(private postService: PostService) { }
 
