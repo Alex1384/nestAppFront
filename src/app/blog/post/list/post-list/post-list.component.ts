@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Observable } from 'rxjs';
-import { PostListItem } from 'src/app/blog/post/services/dataModel/postListItem';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { PostDto } from 'src/app/blog/post/services/dataModel/postDto';
 import { PostService } from 'src/app/blog/post/services/post.service';
+import { MatDialog } from '@angular/material';
+import { CreatePostDialogComponent } from '../../dialogs/create-post-dialog/create-post-dialog.component';
+import { finalize } from 'rxjs/operators';
+import * as _ from 'lodash';
 
 
 @Component({
@@ -12,15 +16,37 @@ import { PostService } from 'src/app/blog/post/services/post.service';
 })
 export class PostListComponent implements OnInit {
 
-  public postList: Observable<PostListItem[]>;
+  public isLoading = false;
   public displayedColumns: string[] = ['id', 'title', 'subTitle', 'imageUrl'];
 
-  constructor(private postService: PostService) { }
+
+  private postListSubject: BehaviorSubject<PostDto[]> = new BehaviorSubject(null);
+
+  constructor(private postService: PostService, private matDialog: MatDialog) { }
 
   ngOnInit() {
-    this.postList = this.postService.getAllPostItems();
+    this.isLoading = true;
+    this.postService.getAllPostItems()
+    .pipe(finalize( () => this.isLoading = false))
+    .subscribe( (postListItems) => this.postListSubject.next(postListItems));
   }
 
+  public getPostList(): Observable<PostDto[]> {
+      return this.postListSubject.asObservable();
+  }
+
+  public createPost() {
+    const ref = this.matDialog.open(CreatePostDialogComponent, {
+      width: '600px'
+    });
+    ref.afterClosed().subscribe( (newPost: PostDto) => {
+      if (newPost) {
+        const list = this.postListSubject.getValue();
+        list.push(newPost);
+        this.postListSubject.next(_.cloneDeep(list));
+      }
+    });
+  }
 
 
 }
