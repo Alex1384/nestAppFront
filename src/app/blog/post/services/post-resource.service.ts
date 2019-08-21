@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { ApiConfig } from '../../ApiConfig';
 import { HttpClient } from '@angular/common/http';
 import { PostDto } from './dataModel/postDto';
-import { Observable } from 'rxjs';
+import { Observable, observable } from 'rxjs';
 import { CreatePostDto } from './dataModel/createPostDto';
+import { EditPostDto } from './dataModel/editPostDto';
 
 @Injectable()
 export class PostResourceService {
@@ -19,4 +20,12 @@ export class PostResourceService {
   public create(createPostDto: CreatePostDto): Observable<CreatePostDto> {
     return this.httpClient.post(this.URL, createPostDto) as Observable<CreatePostDto>;
   }
+
+ public edit(editPostDto: EditPostDto): Observable <PostDto> {
+    return this.httpClient.put(this.URL, editPostDto ) as Observable<EditPostDto>;
+ }
+
+ public delete(postId: number): Observable<any> {
+    return this.httpClient.delete(this.URL + '/ ' + postId);
+ }
 }

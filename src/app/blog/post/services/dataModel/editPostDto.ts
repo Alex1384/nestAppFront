@@ -1,4 +1,5 @@
-export interface PostDto {
+export class EditPostDto {
+
   id: number;
   title: string;
   subTitle: string;

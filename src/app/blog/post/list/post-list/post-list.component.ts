@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-
 import { Observable, BehaviorSubject } from 'rxjs';
 import { PostDto } from 'src/app/blog/post/services/dataModel/postDto';
 import { PostService } from 'src/app/blog/post/services/post.service';
-import { MatDialog } from '@angular/material';
-import { CreatePostDialogComponent } from '../../dialogs/create-post-dialog/create-post-dialog.component';
+import { MatDialog, MatSnackBar } from '@angular/material';
+import {
+  CreatePostDialogComponent } from '../../dialogs/create-post-dialog/create-post-dialog.component';
 import { finalize } from 'rxjs/operators';
 import * as _ from 'lodash';
+import { EditPostDto } from '../../services/dataModel/editPostDto';
+import { ConfirmationDialogComponent } from 'src/app/blog/dialogs/confirmation-dialog/confirmation-dialog.component';
 
 
 @Component({
@@ -17,12 +19,14 @@ import * as _ from 'lodash';
 export class PostListComponent implements OnInit {
 
   public isLoading = false;
-  public displayedColumns: string[] = ['id', 'title', 'subTitle', 'imageUrl'];
+  public displayedColumns: string[] = ['id', 'title', 'subTitle', 'imageUrl', 'action'];
 
 
   private postListSubject: BehaviorSubject<PostDto[]> = new BehaviorSubject(null);
 
-  constructor(private postService: PostService, private matDialog: MatDialog) { }
+  constructor(private postService: PostService,
+              private matDialog: MatDialog,
+              private snackBar: MatSnackBar ) { }
 
   ngOnInit() {
     this.isLoading = true;
@@ -35,6 +39,44 @@ export class PostListComponent implements OnInit {
       return this.postListSubject.asObservable();
   }
 
+  public editPost(editPost: EditPostDto) {
+    const ref = this.matDialog.open(CreatePostDialogComponent, {
+      width: '600px',
+      data: {editPostDto: editPost}
+    });
+
+    ref.afterClosed().subscribe( (editedPost: PostDto) => {
+      if (editedPost) {
+        const list = this.postListSubject.getValue();
+        const postIndex = _.findIndex(list, post => post.id === editedPost.id);
+        list[postIndex] = editedPost;
+        this.postListSubject.next(_.cloneDeep(list));
+      }
+    });
+
+  }
+
+  public deletePost(postDto: PostDto) {
+    const ref = this.matDialog.open(ConfirmationDialogComponent, {width: '250px'});
+
+    ref.afterClosed().subscribe((canContinue) => {
+      if (canContinue) {
+        this.postService.deletePost(postDto.id)
+        .pipe(finalize( () => this.isLoading = false))
+        .subscribe( () => {
+          const list = this.postListSubject.getValue();
+          _.remove(list, post => post.id === postDto.id);
+          this.postListSubject.next(_.cloneDeep(list));
+
+          this.snackBar.open(`Post ${postDto.title} has been removed`, null, {
+            duration: 2500,
+          });
+        });
+      }
+
+    });
+  }
+
   public createPost() {
     const ref = this.matDialog.open(CreatePostDialogComponent, {
       width: '600px'
@@ -44,6 +86,10 @@ export class PostListComponent implements OnInit {
         const list = this.postListSubject.getValue();
         list.push(newPost);
         this.postListSubject.next(_.cloneDeep(list));
+
+        this.snackBar.open(`Post ${newPost.title} has been created`, null, {
+          duration: 2500,
+        });
       }
     });
   }

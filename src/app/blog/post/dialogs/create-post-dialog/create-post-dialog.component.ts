@@ -1,9 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CreatePostDto } from '../../services/dataModel/createPostDto';
 import { NgForm } from '@angular/forms';
 import { PostService } from '../../services/post.service';
 import { finalize } from 'rxjs/operators';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { PostDto } from '../../services/dataModel/postDto';
+import { EditPostDto } from '../../services/dataModel/editPostDto';
+import * as _ from 'lodash';
+import { Observable } from 'rxjs';
 
 
 @Component({
@@ -11,24 +15,42 @@ import { MatDialogRef } from '@angular/material';
   templateUrl: './create-post-dialog.component.html',
   styleUrls: ['./create-post-dialog.component.scss']
 })
-export class CreatePostDialogComponent  {
+export class CreatePostDialogComponent implements OnInit {
 
-  public newPostModel: CreatePostDto = {} as CreatePostDto;
+  public postModel: CreatePostDto | EditPostDto = {} as CreatePostDto;
   public isLoading = false;
+  public isEditing = false;
 
   constructor(private postService: PostService,
-              private dialogRef: MatDialogRef<CreatePostDialogComponent>) { }
+              private dialogRef: MatDialogRef<CreatePostDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) public data: {editPostDto: EditPostDto}) { }
+
+  ngOnInit(): void {
+    this.isEditing = !!_.get(this.data, 'editPostDto');
+    if (this.isEditing) {
+        this.postModel = _.clone(this.data.editPostDto);
+    }
+
+  }
 
 
   public submit(form: NgForm) {
       if (form.valid) {
         this.isLoading = true;
-        this.postService.createPost(this.newPostModel).pipe(finalize( () => this.isLoading = false))
-        .subscribe((response) => {
-            this.dialogRef.close(response);
+        this.handleAfterSubmit(
+              this.isEditing ? this.postService.editPost(this.postModel as EditPostDto) :
+          this.postService.createPost(this.postModel)
+        );
+      }
+  }
+
+  private handleAfterSubmit(observable: Observable<PostDto>) {
+    return observable
+    .pipe(finalize( () => this.isLoading = false))
+    .subscribe((response) => {
+        this.dialogRef.close(response);
 
         });
-      }
   }
 
 }
