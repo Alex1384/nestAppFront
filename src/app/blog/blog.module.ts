@@ -1,8 +1,10 @@
 import { NgModule } from '@angular/core';
-import { PostService } from './post/services/post.service';
-import { PostResourceService } from './post/services/post-resource.service';
 import { PostModule } from './post/post.module';
-import { ConfirmationDialogComponent } from './dialogs/confirmation-dialog/confirmation-dialog.component';
+import {
+   ConfirmationDialogComponent } from './dialogs/confirmation-dialog/confirmation-dialog.component';
+import { RouterModule } from '@angular/router';
+import { BlogRouting } from './blogRouting';
+import { BlogGuard } from './guards/blogGuard';
 
 
 
@@ -12,13 +14,17 @@ import { ConfirmationDialogComponent } from './dialogs/confirmation-dialog/confi
   ],
 
   imports: [
-    PostModule
+    PostModule,
+    RouterModule.forChild(BlogRouting)
 
 
   ],
   exports: [
     PostModule
   ],
+
+  providers: [BlogGuard],
+
 
   entryComponents: [
     ConfirmationDialogComponent

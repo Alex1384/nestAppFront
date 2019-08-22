@@ -4,7 +4,7 @@ import { PostListModule } from './list/post-list.module';
 import { PostService } from './services/post.service';
 import { PostResourceService } from './services/post-resource.service';
 import { CreatePostDialogComponent } from './dialogs/create-post-dialog/create-post-dialog.component';
-import { MaterialModule } from '../material.module';
+import { MaterialModule } from '../../common/material/material.module';
 import { FormsModule } from '@angular/forms';
 
 

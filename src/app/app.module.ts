@@ -4,8 +4,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BlogModule } from './blog/blog.module';
-import { MaterialModule } from './blog/material.module';
+import { MaterialModule } from './common/material/material.module';
 import { HttpClientModule } from '@angular/common/http';
+import { LoginModule } from './login/login.module';
+import { BlogGuard } from './blog/guards/blogGuard';
+import { AuthModule } from './common/auth/auth.module';
 
 
 
@@ -20,7 +23,9 @@ import { HttpClientModule } from '@angular/common/http';
     BlogModule,
     MaterialModule,
     HttpClientModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    LoginModule,
+    AuthModule
 
 
 

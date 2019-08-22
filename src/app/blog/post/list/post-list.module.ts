@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { PostListComponent } from './post-list/post-list.component';
 
 import { BrowserModule } from '@angular/platform-browser';
-import { MaterialModule } from '../../material.module';
+import { MaterialModule } from '../../../common/material/material.module';
 
 
 @NgModule({
